@@ -1,0 +1,6 @@
+{
+  "version": "1",
+  "name": "[Learning] Roast My Spotify",
+  "type": "collection",
+  "ignore": ["node_modules", ".git"]
+}

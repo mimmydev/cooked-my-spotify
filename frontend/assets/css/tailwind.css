@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --malaysia-red: #cc0000;
+    --malaysia-blue: #010066;
+    --malaysia-yellow: #ffcc00;
+    --mamak-orange: #ff6b35;
+  }
+}
+
+/* Malaysian flag gradient utilities */
+.bg-malaysia-gradient {
+  background: linear-gradient(
+    135deg,
+    var(--malaysia-red) 0%,
+    var(--malaysia-blue) 50%,
+    var(--malaysia-yellow) 100%
+  );
+}
+
+.text-malaysia-gradient {
+  background: linear-gradient(
+    135deg,
+    var(--malaysia-red) 0%,
+    var(--malaysia-blue) 50%,
+    var(--malaysia-yellow) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Custom animations for Malaysian theme */
+@keyframes wave {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-wave {
+  animation: wave 2s ease-in-out infinite;
+}
+
+/* Smooth transitions */
+.transition-smooth {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}

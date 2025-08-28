@@ -1,5 +1,5 @@
 {
-  "name": "cooked-my-spotify",
+  "name": "roast-my-spotify",
   "private": true,
   "workspaces": [
     "frontend/*",
