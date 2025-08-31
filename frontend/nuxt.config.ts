@@ -80,10 +80,17 @@ export default defineNuxtConfig({
     host: '0.0.0.0',
   },
 
-  // Nitro configuration for production
+  // Nitro configuration for Cloudflare Pages
   nitro: {
-    preset: 'node-server',
+    preset: 'cloudflare-pages',
+    output: {
+      dir: 'dist',
+      publicDir: 'dist',
+    },
   },
+
+  // Enable SPA mode for better Cloudflare Pages compatibility
+  ssr: false,
 
   // Auto-import composables
   imports: {
