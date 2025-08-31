@@ -83,10 +83,6 @@ export default defineNuxtConfig({
   // Nitro configuration for Cloudflare Pages
   nitro: {
     preset: 'cloudflare-pages',
-    output: {
-      dir: 'dist',
-      publicDir: 'dist',
-    },
   },
 
   // Enable SPA mode for better Cloudflare Pages compatibility
