@@ -1,6 +1,6 @@
 {
   "version": "1",
-  "name": "[Learning] Cooked My Spotify",
+  "name": "[Learning] Roast My Spotify",
   "type": "collection",
   "ignore": ["node_modules", ".git"]
 }

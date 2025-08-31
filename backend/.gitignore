@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.esbuild/
+.serverless/
+.env
+.env.local
+*.zip
+*.log
+.DS_Store
+
+# TypeScript compiled files
+*.js
+*.d.ts
+*.js.map
+*.d.ts.map

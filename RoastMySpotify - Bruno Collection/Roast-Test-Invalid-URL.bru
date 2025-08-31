@@ -1,0 +1,21 @@
+meta {
+  name: Roast Test - Invalid URL (Error Test)
+  type: http
+  seq: 3
+}
+
+post {
+  url: https://mxkqhkn2i4.execute-api.ap-southeast-1.amazonaws.com/api/roast
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "playlist_url": "https://invalid-url.com/not-a-spotify-playlist"
+  }
+}

@@ -1,0 +1,21 @@
+meta {
+  name: Roast Test - Playlist 1
+  type: http
+  seq: 1
+}
+
+post {
+  url: https://6ar978foa6.execute-api.ap-southeast-1.amazonaws.com/api/roast
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "playlist_url": "https://open.spotify.com/playlist/5WkA989Md0sF9YpoAj4tZz?si=uHlQ_8QJTu2wkeHw_uX1yQ"
+  }
+}

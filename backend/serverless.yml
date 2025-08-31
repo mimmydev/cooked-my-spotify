@@ -1,0 +1,199 @@
+service: roast-spotify-api-v3
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: ap-southeast-1
+  stage: dev
+
+  environment:
+    NODE_ENV: ${self:provider.stage}
+    SPOTIFY_CLIENT_ID: ${env:SPOTIFY_CLIENT_ID}
+    SPOTIFY_CLIENT_SECRET: ${env:SPOTIFY_CLIENT_SECRET}
+    RATE_LIMITING_ENABLED: ${env:RATE_LIMITING_ENABLED}
+    ROAST_STORAGE_ENABLED: ${env:ROAST_STORAGE_ENABLED}
+    RATE_LIMIT_PER_DAY: 10 # Free tier friendly limit
+    # RDS Configuration
+    RDS_HOST: ${env:RDS_HOST}
+    RDS_USER: ${env:RDS_USER}
+    DB_PASSWORD: ${env:DB_PASSWORD}
+    RDS_DATABASE: ${env:RDS_DATABASE}
+    RDS_PORT: ${env:RDS_PORT}
+
+  httpApi:
+    cors:
+      allowedOrigins:
+        - '*'
+      allowedHeaders:
+        - Content-Type
+        - Authorization
+      allowedMethods:
+        - GET
+        - POST
+        - PUT
+        - DELETE
+        - OPTIONS
+      allowCredentials: false
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - bedrock:InvokeModel
+      Resource: '*'
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+      Resource:
+        Fn::GetAtt:
+          - RateLimitTable
+          - Arn
+
+custom:
+  dotenv:
+    path: .env
+  esbuild:
+    bundle: true
+    minify: false
+    target: node22
+    sourcemap: true
+    exclude:
+      - '@aws-sdk/*'
+    platform: node
+    concurrency: 10
+
+functions:
+  generateRoast:
+    handler: src/handlers/generateRoast.handler
+    timeout: 25
+    memorySize: 256
+    events:
+      - httpApi:
+          path: /api/roast
+          method: post
+
+  getRoastList:
+    handler: src/handlers/getRoastList.handler
+    timeout: 15
+    memorySize: 256
+    events:
+      - httpApi:
+          path: /api/roasts
+          method: get
+
+plugins:
+  - serverless-esbuild
+  - serverless-dotenv-plugin
+  - serverless-offline
+
+resources:
+  Resources:
+    # DynamoDB table for rate limiting
+    RateLimitTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: daily-roast-limits
+        AttributeDefinitions:
+          - AttributeName: ip_address
+            AttributeType: S
+          - AttributeName: request_timestamp
+            AttributeType: N
+        KeySchema:
+          - AttributeName: ip_address
+            KeyType: HASH
+          - AttributeName: request_timestamp
+            KeyType: RANGE
+        BillingMode: PROVISIONED
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+        TimeToLiveSpecification:
+          AttributeName: expiration_time
+          Enabled: true
+
+    # RDS MySQL instance - FREE TIER COMPLIANT (FIXED VERSION)
+    RDSInstance:
+      Type: AWS::RDS::DBInstance
+      Properties:
+        DBInstanceIdentifier: roast-spotify-mysql-dev-v3
+        DBInstanceClass: db.t3.micro # 750 hours/month FREE
+        Engine: MySQL
+        EngineVersion: '8.0.42' # ✅ FIXED: Latest supported version
+        AllocatedStorage: 20 # Maximum 20 GB FREE
+        StorageType: gp2 # General Purpose SSD
+        MultiAZ: false # NOT included in free tier
+        BackupRetentionPeriod: 7 # Maximum 7 days FREE
+        PreferredBackupWindow: '03:00-04:00' # Low traffic window
+        PreferredMaintenanceWindow: 'sun:04:00-sun:05:00'
+        MonitoringInterval: 0 # Basic monitoring only (FREE)
+        PubliclyAccessible: true # Lambda outside VPC needs access
+        # Using default VPC security for simplicity
+        DBName: roast_spotify
+        MasterUsername: admin
+        MasterUserPassword: ${env:DB_PASSWORD}
+        DeletionProtection: false # For development flexibility
+        StorageEncrypted: true # Security best practice
+        # ✅ ADDED: Enable automatic minor version upgrades
+        AutoMinorVersionUpgrade: true # Keep up with security patches
+        Tags:
+          - Key: Environment
+            Value: ${self:provider.stage}
+          - Key: Project
+            Value: Malaysian-Spotify-Roasting-API
+          - Key: FreeTier
+            Value: 'true'
+
+    # CloudWatch alarms for Free Tier monitoring
+    RDSCPUAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: RDS-HighCPU-${self:provider.stage}
+        AlarmDescription: Monitor RDS CPU usage to prevent overages
+        MetricName: CPUUtilization
+        Namespace: AWS/RDS
+        Statistic: Average
+        Period: 300
+        EvaluationPeriods: 2
+        Threshold: 80
+        ComparisonOperator: GreaterThanThreshold
+        Dimensions:
+          - Name: DBInstanceIdentifier
+            Value: !Ref RDSInstance
+
+    RDSConnectionAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: RDS-HighConnections-${self:provider.stage}
+        AlarmDescription: Monitor RDS connection count
+        MetricName: DatabaseConnections
+        Namespace: AWS/RDS
+        Statistic: Average
+        Period: 300
+        EvaluationPeriods: 2
+        Threshold: 15
+        ComparisonOperator: GreaterThanThreshold
+        Dimensions:
+          - Name: DBInstanceIdentifier
+            Value: !Ref RDSInstance
+
+  # CloudFormation outputs for easy access
+  Outputs:
+    RDSEndpoint:
+      Description: RDS MySQL endpoint
+      Value: !GetAtt RDSInstance.Endpoint.Address
+      Export:
+        Name: ${self:service}-${self:provider.stage}-rds-endpoint
+
+    RDSPort:
+      Description: RDS MySQL port
+      Value: !GetAtt RDSInstance.Endpoint.Port
+      Export:
+        Name: ${self:service}-${self:provider.stage}-rds-port
+
+    DynamoDBTableName:
+      Description: DynamoDB table for rate limiting
+      Value: !Ref RateLimitTable
+      Export:
+        Name: ${self:service}-${self:provider.stage}-dynamodb-table
