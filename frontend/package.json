@@ -1,5 +1,5 @@
 {
-  "name": "Roast-spotify-frontend",
+  "name": "roast-spotify-frontend",
   "type": "module",
   "private": true,
   "engines": {
@@ -15,7 +15,7 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare",
+    "postinstall": "nuxt prepare --no-lock",
     "preinstall": "npx only-allow bun"
   },
   "dependencies": {

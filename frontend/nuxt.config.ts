@@ -80,13 +80,10 @@ export default defineNuxtConfig({
     host: '0.0.0.0',
   },
 
-  // Nitro configuration for Cloudflare Pages
+  // Nitro configuration for Vercel
   nitro: {
-    preset: 'cloudflare-pages',
+    preset: 'vercel',
   },
-
-  // Enable SPA mode for better Cloudflare Pages compatibility
-  ssr: false,
 
   // Auto-import composables
   imports: {
