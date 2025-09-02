@@ -418,7 +418,3 @@ The `useSpotifyRoast` composable provides:
 ## License
 
 MIT License - see LICENSE file for details
-
----
-
-🇲🇾 **Selamat Hari Merdeka!** 🇲🇾

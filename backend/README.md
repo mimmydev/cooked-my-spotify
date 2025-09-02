@@ -288,7 +288,7 @@ iamRoleStatements:
 - **User Display Name**: Currently storing playlist owner instead of actual user
 - **Duplicate Detection**: Name-based matching could miss playlists with same tracks but different names
 
-### 🔮 Future Enhancements (Phase 3)
+### 🔮 Future Enhancements (Phase 3 - Unlikely)
 
 - **Enhanced Duplicate Detection**: Track-based hashing for better accuracy
 - **User Authentication**: Allow users to save their roasts
@@ -307,7 +307,3 @@ iamRoleStatements:
 ## 📝 License
 
 This project is licensed under the MIT License.
-
----
-
-**Built with ❤️ and Malaysian humor by the Roast My Spotify team**
