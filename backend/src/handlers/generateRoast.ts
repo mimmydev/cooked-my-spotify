@@ -215,15 +215,31 @@ export const handler: APIGatewayProxyHandler = async (event) => {
   } catch (error: any) {
     console.error('Lambda execution error:', error);
 
-    // Handle specific error types
-    if (error.message.includes('Missing Spotify credentials')) {
+    // Handle specific error types with better categorization
+    if (error.message?.includes('Missing Spotify credentials')) {
       return createErrorResponse('Spotify configuration error', 503, {
         hint: 'Check SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET environment variables',
       });
     }
 
-    if (error.message.includes('ThrottlingException')) {
+    if (error.message?.includes('ThrottlingException') || error.name === 'ThrottlingException') {
       return createErrorResponse(malaysianErrors.throttled, 429);
+    }
+
+    // Handle network/timeout errors
+    if (
+      error.code === 'ECONNREFUSED' ||
+      error.code === 'ETIMEDOUT' ||
+      error.message?.includes('timeout')
+    ) {
+      return createErrorResponse('Service temporarily unavailable', 503, {
+        retry_after: 30,
+      });
+    }
+
+    // Handle validation errors
+    if (error.message?.includes('validation') || error.message?.includes('invalid')) {
+      return createErrorResponse('Invalid request data', 400);
     }
 
     return createErrorResponse(malaysianErrors.generalError, 500);
