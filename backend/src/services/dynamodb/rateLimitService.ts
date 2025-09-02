@@ -21,6 +21,8 @@ export class RateLimitService {
    * @param clientIp - Client IP address
    * @returns Promise<IRateLimitResult> - allowed status and remaining count
    */
+  // WIP: Race condition potential - check-then-increment pattern may allow double requests
+  // in high concurrency scenarios. Consider implementing atomic increment or conditional writes
   async checkDailyLimit(clientIp: string): Promise<IRateLimitResult> {
     // Development mode bypass
     if (!this.isEnabled) {
