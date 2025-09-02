@@ -74,6 +74,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       console.log(`Fetched: "${playlistData.name}" (${playlistData.trackCount} tracks)`);
     } catch (error: any) {
       console.error('Spotify fetch error:', error.message);
+      // TODO: Consider adding more detailed logging for debugging playlist fetch failures
 
       if (error.message.includes('not found') || error.message.includes('private')) {
         return createErrorResponse(malaysianErrors.playlistNotFound, 404);
