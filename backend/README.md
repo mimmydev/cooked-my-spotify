@@ -8,20 +8,28 @@ A serverless Malaysian playlist roasting API built with AWS Lambda, Bedrock (Cla
 backend/
 ├── src/
 │   ├── handlers/
-│   │   └── generateRoast.ts          # Main Lambda handler (POST /api/roast)
+│   │   ├── generateRoast.ts          # Main Lambda handler (POST /api/roast)
+│   │   └── getRoastList.ts           # Public roast feed handler (GET /api/roasts)
 │   ├── services/
-│   │   ├── spotifyService.ts         # Spotify Web API integration
-│   │   ├── bedrockService.ts         # AWS Bedrock AI roasting
-│   │   └── musicAnalysisService.ts   # Music taste analysis engine
-│   ├── utils/
-│   │   └── response.ts               # API response utilities
-│   └── types/
-│       └── index.ts                  # TypeScript interfaces
-├── test-roast.ts                     # Full API endpoint testing
-├── test-services.ts                  # Individual service testing
-├── package.json                      # Dependencies and scripts
-├── serverless.yml                    # Serverless Framework config
-└── tsconfig.json                     # TypeScript configuration
+│   │   ├── common/
+│   │   │   ├── spotifyService.ts         # Spotify Web API integration
+│   │   │   ├── bedrockService.ts         # AWS Bedrock AI integration
+│   │   │   └── musicAnalysisService.ts   # Music taste analysis engine
+│   │   ├── dynamodb/
+│   │   │   ├── dynamoClient.ts           # DynamoDB client setup
+│   │   │   └── rateLimitService.ts       # Rate limiting (10/day per IP)
+│   │   └── rds/
+│   │       ├── connection.ts             # MySQL connection pool
+│   │       ├── roastService.ts           # Roast storage & retrieval
+│   │       └── playlistMetadataService.ts # Duplicate detection
+│   ├── types/
+│   │   └── index.ts                  # Shared TypeScript interfaces
+│   └── utils/
+│       └── response.ts               # API response utilities
+├── test-*.ts                         # Comprehensive test files
+├── serverless.yml                    # AWS deployment configuration
+├── package.json                      # Backend dependencies
+└── README.md                         # This documentation
 ```
 
 ## 🚀 Features
@@ -255,20 +263,38 @@ iamRoleStatements:
 - **Spotify API**: ~500-1000ms
 - **Bedrock AI**: ~1-3 seconds
 
-## 🎯 Future Enhancements (Phase 2 & 3)
+## 🎯 Current Implementation Status
 
-### Phase 2 - Database Integration
+### ✅ Phase 1 - AI Integration (Complete)
 
-- Store roasts in DynamoDB
-- Public roast feed (GET /api/roasts)
-- Roast sharing and reactions
+- **Real Spotify Integration**: Fetches actual playlist data via Spotify Web API
+- **Advanced Music Analysis**: Popularity scores, artist diversity, local music detection
+- **Malaysian Cultural AI**: Claude 3 Haiku with Malaysian slang and cultural references
+- **Intelligent Fallbacks**: Smart error handling with Malaysian humor
+- **Clean Architecture**: Service-based design with proper separation of concerns
 
-### Phase 3 - Advanced Features
+### ✅ Phase 2 - Database Integration (Complete)
 
-- Rate limiting and caching
-- User authentication
-- Playlist comparison roasts
-- Social media integration
+- **DynamoDB Rate Limiting**: 10 requests/day per IP with atomic operations
+- **RDS MySQL Storage**: Persistent roast storage with pagination
+- **Duplicate Detection**: Prevents roasting the same playlist multiple times
+- **Public Roast Feed**: GET `/api/roasts` with pagination support
+- **Connection Pooling**: Efficient MySQL connection management
+
+### 🚧 Known Issues & WIP Items
+
+- **Rate Limiting Race Condition**: Check-then-increment pattern may allow concurrent requests to exceed limits
+- **Pagination Testing**: Need to verify pagination works correctly with large datasets
+- **User Display Name**: Currently storing playlist owner instead of actual user
+- **Duplicate Detection**: Name-based matching could miss playlists with same tracks but different names
+
+### 🔮 Future Enhancements (Phase 3)
+
+- **Enhanced Duplicate Detection**: Track-based hashing for better accuracy
+- **User Authentication**: Allow users to save their roasts
+- **Playlist Comparison**: Compare multiple playlists side-by-side
+- **Social Features**: Roast sharing, reactions, and community features
+- **Advanced Analytics**: Music taste trends and cultural insights
 
 ## 🤝 Contributing
 
