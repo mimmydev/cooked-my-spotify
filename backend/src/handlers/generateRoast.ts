@@ -39,6 +39,8 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       'unknown';
 
     // Check rate limit BEFORE processing
+    // TODO: This check-then-increment approach might have race conditions in high concurrency
+    // Consider implementing atomic operations or Redis-based rate limiting for better accuracy
     const rateCheck = await rateLimitService.checkDailyLimit(clientIp);
     if (!rateCheck.allowed) {
       return createErrorResponse(
@@ -85,6 +87,8 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     }
 
     // 🔍 CHECK FOR DUPLICATES (after getting playlist name but before processing)
+    // TODO: Current duplicate detection only checks by name, but what about playlists with same tracks?
+    // Should implement fuzzy matching or track-based hashing for better duplicate detection
     try {
       const duplicateCheck = await playlistMetadataService.checkForDuplicate(
         playlistData.name,
@@ -156,7 +160,8 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       const storageResult = await roastStorageService.saveRoast({
         playlistSpotifyId: playlistId,
         userIpAddress: clientIp,
-        userDisplayName: playlistData.owner, // Pass the playlist owner from Spotify API
+        userDisplayName: playlistData.owner, // TODO: This is storing playlist owner, not the actual user who submitted
+        // Need to figure out how to get the actual user's display name from the request
         roastText: roastText,
         playlistMetadata: playlistMetadata,
       });
@@ -204,7 +209,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       },
       rate_limit: {
         remaining: remainingRequests,
-        limit: parseInt(process.env.RATE_LIMIT_PER_DAY || '10', 10),
+        limit: parseInt(process.env.RATE_LIMIT_PER_DAY || '10', 10), // TODO: This is hardcoded, should be configurable
       },
     });
   } catch (error: any) {
