@@ -146,9 +146,10 @@ export class RoastStorageService {
       const countResult = await executeQuery(countQuery);
       const totalCount = countResult[0]?.total || 0;
 
-      // Get roasts with pagination - simplified query for debugging
+      // Get roasts with pagination
+      // TODO: Test this pagination implementation to ensure it works correctly with large datasets
       const query = `
-        SELECT 
+        SELECT
           roast_id,
           playlist_spotify_id,
           user_ip_address,
@@ -157,13 +158,13 @@ export class RoastStorageService {
           generated_at,
           playlist_metadata,
           is_public
-        FROM roasts 
-        WHERE is_public = true 
-        ORDER BY generated_at DESC 
-        LIMIT 10
+        FROM roasts
+        WHERE is_public = true
+        ORDER BY generated_at DESC
+        LIMIT ? OFFSET ?
       `;
 
-      const roasts = await executeQuery(query);
+      const roasts = await executeQuery(query, [limit, offset]);
 
       // Transform results
       const transformedRoasts: IRoast[] = roasts.map((row: any) => {
