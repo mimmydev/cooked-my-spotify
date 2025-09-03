@@ -116,7 +116,7 @@ A full-stack Malaysian playlist roasting application that uses AI to analyze Spo
 
    ```bash
    git clone <repository-url>
-   cd cooked-my-spotify/frontend
+   cd roast-my-spotify/frontend
    ```
 
 2. **Install dependencies**
